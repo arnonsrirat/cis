@@ -883,35 +883,16 @@ select {
   display: block;
   position: absolute;
   top: 0; left: 0; bottom: 0; right: 0;
-  background: rgba(18, 16, 16, 0.1);
+  background: rgba(18, 16, 16, 0.15);
   opacity: 0;
   z-index: 99;
   pointer-events: none;
-  animation: crt-flicker 0.15s infinite;
+  animation: crt-flicker 5s infinite ease-in-out;
 }
 
 @keyframes crt-flicker {
-  0% { opacity: 0.27861; }
-  5% { opacity: 0.34769; }
-  10% { opacity: 0.23604; }
-  15% { opacity: 0.90626; }
-  20% { opacity: 0.18128; }
-  25% { opacity: 0.83891; }
-  30% { opacity: 0.65583; }
-  35% { opacity: 0.67807; }
-  40% { opacity: 0.26559; }
-  45% { opacity: 0.84693; }
-  50% { opacity: 0.96019; }
-  55% { opacity: 0.13594; }
-  60% { opacity: 0.88013; }
-  65% { opacity: 0.25108; }
-  70% { opacity: 0.85963; }
-  75% { opacity: 0.2825; }
-  80% { opacity: 0.9161; }
-  85% { opacity: 0.50198; }
-  90% { opacity: 0.62171; }
-  95% { opacity: 0.32042; }
-  100% { opacity: 0.8251; }
+  0%, 100% { opacity: 0.06; }
+  50% { opacity: 0.16; }
 }
 
 /* Sound Equalizer Button */

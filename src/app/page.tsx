@@ -172,9 +172,10 @@ export default function Home() {
   const [progress, setProgress] = useState(0);
   const [decryptProgress, setDecryptProgress] = useState(0);
   const [activeCodeLine, setActiveCodeLine] = useState(-1);
-  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const [replayKey, setReplayKey] = useState(0);
 
   const soundEngineRef = useRef<SoundEngine | null>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   // Initialize sound engine on client side
   useEffect(() => {
@@ -223,6 +224,9 @@ export default function Home() {
   useEffect(() => {
     if (stage !== "card") return;
 
+    setProgress(0);
+    setActiveCodeLine(-1);
+
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
@@ -242,7 +246,7 @@ export default function Home() {
     }, 90); // ~9 seconds total card reveal timeline
 
     return () => clearInterval(interval);
-  }, [stage]);
+  }, [stage, replayKey]);
 
   const handleStartDecryption = () => {
     setAudioEnabled(true);
@@ -257,36 +261,35 @@ export default function Home() {
     soundEngineRef.current?.playSweep();
     setTimeout(() => {
       setStage("card");
-      setProgress(0);
-      setActiveCodeLine(-1);
     }, 1800); // Wait for flap and card slide animations to complete
   };
 
   const handleReplay = () => {
-    setProgress(0);
-    setActiveCodeLine(-1);
-    setStage("card");
+    setReplayKey((k) => k + 1);
     soundEngineRef.current?.playSweep();
   };
 
-  // Parallax tilt logic for card hover
+  // Direct DOM manipulation for tilt glare effect (prevents React re-renders)
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const card = e.currentTarget;
+    const card = cardRef.current;
+    if (!card) return;
     const rect = card.getBoundingClientRect();
     const x = e.clientX - rect.left - rect.width / 2;
     const y = e.clientY - rect.top - rect.height / 2;
-    // Max 10 degrees tilt rotation
+    // Rotate cards slightly based on cursor
     const rotateX = -(y / (rect.height / 2)) * 8;
     const rotateY = (x / (rect.width / 2)) * 8;
-    setTilt({ x: rotateX, y: rotateY });
+    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
   };
 
   const handleMouseLeave = () => {
-    setTilt({ x: 0, y: 0 });
+    if (cardRef.current) {
+      cardRef.current.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg)";
+    }
   };
 
   return (
-    <main className={`invite-film ${stage === "card" ? "is-open is-cinematic" : ""}`}>
+    <main className={`invite-film ${stage === "opening" || stage === "card" ? "is-open" : ""} ${stage === "card" ? "is-cinematic" : ""}`}>
       <div className="film-grain" />
       <div className="matrix-grid" />
       <div className="scanlines-overlay" />
@@ -322,7 +325,7 @@ export default function Home() {
           <div>DECRYPT: 256-BIT</div>
         </div>
         <div className="camera-bottom-row">
-          <div>TC 00:0{Math.floor(progress / 20)}:{String(Math.floor((progress % 20) * 3)).padStart(2, "0")}</div>
+          <div>TC 00:0{Math.floor((progress / 100) * 8)}:{String(Math.floor(((progress / 100) * 8 % 1) * 24)).padStart(2, "0")}</div>
           <div>HOLOGRAPHIC TRANS [ACTIVE]</div>
         </div>
       </div>
@@ -408,19 +411,19 @@ export default function Home() {
       )}
 
       {/* Stage 4: Cinematic Widescreen Invitation Card Display */}
-      {stage === "card" && (
-        <section className="card-stage is-open" aria-label="การ์ดเชิญเข้าร่วมงาน">
+      {(stage === "opening" || stage === "card") && (
+        <section className={`card-stage ${stage === "card" ? "is-open" : ""}`} aria-label="การ์ดเชิญเข้าร่วมงาน">
           {/* Card wrapper with interactive 3D hover/tilt glare effect */}
           <div
+            ref={cardRef}
             className="console-card-wrapper"
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
             style={{
-              transform: `perspective(1000px) rotateX(${tilt.y}deg) rotateY(${tilt.x}deg)`,
               transition: "transform 0.15s ease-out",
             }}
           >
-            <div className="movie-card is-open">
+            <div className="movie-card">
               <div className="banner-scene">
                 <div className="banner-image" />
                 <div className="banner-glass" />
@@ -493,36 +496,40 @@ export default function Home() {
           </div>
 
           {/* Immersive Video Progress Slider Bar at the bottom of the screen */}
-          <div className={`player-controls ${progress >= 0 ? "visible" : ""}`}>
-            <div className="timeline-row">
-              <span className="timeline-time">00:{String(Math.floor(progress / 12)).padStart(2, "0")}</span>
-              <div className="timeline-slider-track" onClick={(e) => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                const clickX = e.clientX - rect.left;
-                const percent = Math.floor((clickX / rect.width) * 100);
-                setProgress(percent);
-                setActiveCodeLine(Math.floor(percent / 20) - 1);
-              }}>
-                <div className="timeline-slider-fill" style={{ width: `${progress}%` }} />
-              </div>
-              <span className="timeline-time">00:08</span>
-            </div>
-            
-            <div className="controls-row">
-              <div className="control-group-left">
-                <div className="playback-state-text">
-                  <span />
-                  {progress < 100 ? "TRANSMITTING SIGNALS..." : "TRANSMISSION COMPLETE"}
+          {stage === "card" && (
+            <div className="player-controls visible">
+              <div className="timeline-row">
+                <span className="timeline-time">00:0{Math.floor((progress / 100) * 8)}</span>
+                <div className="timeline-slider-track" onClick={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const clickX = e.clientX - rect.left;
+                  const percent = Math.floor((clickX / rect.width) * 100);
+                  setProgress(percent);
+                  setActiveCodeLine(Math.floor(percent / 20) - 1);
+                }}>
+                  <div className="timeline-slider-fill" style={{ width: `${progress}%` }} />
                 </div>
+                <span className="timeline-time">00:08</span>
               </div>
               
-              <div className="control-group-right">
-                <button className="action-btn-pill primary" onClick={handleReplay}>
-                  ชมอีกครั้ง (REPLAY)
-                </button>
+              <div className="controls-row">
+                <div className="control-group-left">
+                  <div className="playback-state-text">
+                    <span />
+                    {progress < 100 ? "TRANSMITTING SIGNALS..." : "TRANSMISSION COMPLETE"}
+                  </div>
+                </div>
+                
+                <div className="control-group-right">
+                  {progress === 100 && (
+                    <button className="action-btn-pill primary" onClick={handleReplay}>
+                      ชมอีกครั้ง (REPLAY)
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </section>
       )}
     </main>
