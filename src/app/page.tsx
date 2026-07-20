@@ -650,7 +650,7 @@ export default function Home() {
       {/* Stage 2: Decrypting Loader animation */}
       {stage === "decrypting" && (
         <section className="intro-stage" aria-label="กำลังถอดรหัสข้อมูล">
-          <div className={`intro-console ${isShaking ? "active" : ""}`}>
+          <div className={`intro-console ${isShaking ? "shake-active" : ""}`}>
             <div className="intro-laser" />
             <div className="intro-status-code">DECRYPTING PACKETS...</div>
             <div className="decrypting-container">
@@ -669,33 +669,31 @@ export default function Home() {
       {/* Stage 3: Envelope Stage */}
       {(stage === "envelope" || stage === "opening") && (
         <section className={`envelope-stage ${stage === "opening" ? "is-open" : ""}`} aria-label="ซองการ์ดเชิญอาจารย์">
-          <div className={`shake-container ${isShaking ? "active" : ""}`}>
-            <button
-              className="envelope-button"
-              type="button"
-              onClick={handleOpenEnvelope}
-              disabled={stage === "opening"}
-              aria-label="แตะเพื่อเปิดการ์ดเชิญ"
-            >
-              {showRipple && <span className="seal-ripple" />}
-              <span className="tap-light" />
-              <span className="invite-card-peek">
-                <span className="peek-grid" />
-                <span className="peek-title">CIS INVITATION</span>
-                <span className="peek-line" />
-                <span className="peek-line short" />
-              </span>
-              <span className="envelope-back" />
-              <span className="envelope-left" />
-              <span className="envelope-right" />
-              <span className="envelope-front" />
-              <span className="envelope-flap" />
-              <span className="wax-seal">
-                <span>CIS</span>
-              </span>
-              <span className="tap-copy">แตะเพื่อเปิดการ์ดเชิญ</span>
-            </button>
-          </div>
+          <button
+            className={`envelope-button ${isShaking ? "shake-active" : ""}`}
+            type="button"
+            onClick={handleOpenEnvelope}
+            disabled={stage === "opening"}
+            aria-label="แตะเพื่อเปิดการ์ดเชิญ"
+          >
+            {showRipple && <span className="seal-ripple" />}
+            <span className="tap-light" />
+            <span className="invite-card-peek">
+              <span className="peek-grid" />
+              <span className="peek-title">CIS INVITATION</span>
+              <span className="peek-line" />
+              <span className="peek-line short" />
+            </span>
+            <span className="envelope-back" />
+            <span className="envelope-left" />
+            <span className="envelope-right" />
+            <span className="envelope-front" />
+            <span className="envelope-flap" />
+            <span className="wax-seal">
+              <span>CIS</span>
+            </span>
+            <span className="tap-copy">แตะเพื่อเปิดการ์ดเชิญ</span>
+          </button>
         </section>
       )}
 
