@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "การ์ดเชิญอาจารย์ | CS Invitation",
-  description: "Animated invitation card for a computer science event.",
+  title: "การ์ดเชิญอาจารย์ | CIS Invitation",
+  description: "Animated invitation card for a computer and information science event.",
 };
 
 export default function RootLayout({

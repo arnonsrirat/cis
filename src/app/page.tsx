@@ -173,6 +173,7 @@ export default function Home() {
   const [decryptProgress, setDecryptProgress] = useState(0);
   const [activeCodeLine, setActiveCodeLine] = useState(-1);
   const [replayKey, setReplayKey] = useState(0);
+  const [bannerUrl, setBannerUrl] = useState<string | null>(null);
 
   const soundEngineRef = useRef<SoundEngine | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -194,6 +195,14 @@ export default function Home() {
       }
     }
   }, [audioEnabled]);
+
+  // Load custom uploaded banner from localStorage if exists
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("invitation_banner");
+      setBannerUrl(stored);
+    }
+  }, [replayKey, stage]);
 
   // Decryption progress logic
   useEffect(() => {
@@ -349,9 +358,9 @@ export default function Home() {
           <div className="intro-console">
             <div className="intro-laser" />
             <div className="intro-status-code">Security protocol encrypted</div>
-            <h1 className="intro-title font-sans">CS INVITATION</h1>
+            <h1 className="intro-title font-sans">CIS INVITATION</h1>
             <p className="intro-desc">
-              ระบบส่งสัญญาณการ์ดเชิญส่วนบุคคลสำหรับอาจารย์วิทยาการคอมพิวเตอร์ <br />
+              ระบบส่งสัญญาณการ์ดเชิญส่วนบุคคลสำหรับอาจารย์สาขาวิทยาการคอมพิวเตอร์และสารสนเทศ (CIS) <br />
               กรุณากดปุ่มด้านล่างเพื่อเริ่มถอดรหัสสัญญาณสัญญาณเข้าสู่ระบบ
             </p>
             <button className="decrypt-btn" onClick={handleStartDecryption}>
@@ -372,7 +381,7 @@ export default function Home() {
                 <div className="decrypt-bar-fill" style={{ width: `${decryptProgress}%` }} />
               </div>
               <div className="decrypt-status-text">
-                <span>CONNECTING: CS_NODE_ALPHA</span>
+                <span>CONNECTING: CIS_NODE_ALPHA</span>
                 <span>{decryptProgress}%</span>
               </div>
             </div>
@@ -393,7 +402,7 @@ export default function Home() {
             <span className="tap-light" />
             <span className="invite-card-peek">
               <span className="peek-grid" />
-              <span className="peek-title">CS INVITATION</span>
+              <span className="peek-title">CIS INVITATION</span>
               <span className="peek-line" />
               <span className="peek-line short" />
             </span>
@@ -403,7 +412,7 @@ export default function Home() {
             <span className="envelope-front" />
             <span className="envelope-flap" />
             <span className="wax-seal">
-              <span>CS</span>
+              <span>CIS</span>
             </span>
             <span className="tap-copy">แตะเพื่อเปิดการ์ดเชิญ</span>
           </button>
@@ -425,7 +434,14 @@ export default function Home() {
           >
             <div className="movie-card">
               <div className="banner-scene">
-                <div className="banner-image" />
+                <div 
+                  className="banner-image" 
+                  style={{
+                    backgroundImage: bannerUrl 
+                      ? `linear-gradient(90deg, rgba(5, 7, 13, 0.22), rgba(5, 7, 13, 0.02) 54%, rgba(5, 7, 13, 0.36)), url(${bannerUrl})` 
+                      : undefined
+                  }}
+                />
                 <div className="banner-glass" />
                 <div className="hologram-glare" />
                 <div className="scan-line" />
@@ -449,7 +465,7 @@ export default function Home() {
                 <p>FACULTY INVITATION SEQUENCE</p>
                 <h1 className="font-sans text-white text-shadow-md">ขอเรียนเชิญอาจารย์เข้าร่วมงาน</h1>
                 <span className="text-gray-200">
-                  ร่วมเป็นเกียรติในช่วงเวลาสำคัญของนักศึกษาสายวิทยาการคอมพิวเตอร์
+                  ร่วมเป็นเกียรติในช่วงเวลาสำคัญของนักศึกษาสาขาวิทยาการคอมพิวเตอร์และสารสนเทศ (CIS)
                 </span>
               </div>
 
