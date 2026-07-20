@@ -1,65 +1,120 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+
+const codeLines = [
+  "boot.invitation('faculty')",
+  "await envelope.open()",
+  "card.reveal({ ratio: '16:9' })",
+  "professor.join(ceremony)",
+];
+
+const particles = Array.from({ length: 34 }, (_, index) => ({
+  id: index,
+  left: `${(index * 29) % 100}%`,
+  delay: `${(index % 11) * 0.18}s`,
+  duration: `${5.4 + (index % 8) * 0.28}s`,
+}));
+
+const nodes = [
+  { top: "18%", left: "12%" },
+  { top: "24%", left: "82%" },
+  { top: "66%", left: "9%" },
+  { top: "76%", left: "78%" },
+  { top: "47%", left: "92%" },
+  { top: "36%", left: "5%" },
+];
 
 export default function Home() {
+  const [isOpened, setIsOpened] = useState(false);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className={`invite-film ${isOpened ? "is-open" : ""}`}>
+      <div className="film-grain" />
+      <div className="matrix-grid" />
+
+      <div className="signal-particles" aria-hidden="true">
+        {particles.map((particle) => (
+          <span
+            key={particle.id}
+            style={{
+              left: particle.left,
+              animationDelay: particle.delay,
+              animationDuration: particle.duration,
+            }}
+          />
+        ))}
+      </div>
+
+      <section className="envelope-stage" aria-label="ซองการ์ดเชิญอาจารย์">
+        <button
+          className="envelope-button"
+          type="button"
+          onClick={() => setIsOpened(true)}
+          disabled={isOpened}
+          aria-label="แตะเพื่อเปิดการ์ดเชิญ"
+        >
+          <span className="tap-light" />
+          <span className="invite-card-peek">
+            <span className="peek-grid" />
+            <span className="peek-title">CS INVITATION</span>
+            <span className="peek-line" />
+            <span className="peek-line short" />
+          </span>
+          <span className="envelope-back" />
+          <span className="envelope-left" />
+          <span className="envelope-right" />
+          <span className="envelope-front" />
+          <span className="envelope-flap" />
+          <span className="wax-seal">
+            <span>CS</span>
+          </span>
+          <span className="tap-copy">แตะเพื่อเปิดการ์ดเชิญ</span>
+        </button>
+      </section>
+
+      <section className="card-stage" aria-label="การ์ดเชิญเข้าร่วมงาน">
+        <div className="movie-card">
+          <div className="banner-scene">
+            <div className="banner-image" />
+            <div className="banner-glass" />
+            <div className="corner-marker marker-a" />
+            <div className="corner-marker marker-b" />
+            <div className="corner-marker marker-c" />
+            <div className="corner-marker marker-d" />
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+
+        <div className="story-copy">
+          <p>Faculty Invitation Sequence</p>
+          <h1>ขอเรียนเชิญอาจารย์เข้าร่วมงาน</h1>
+          <span>
+            ร่วมเป็นเกียรติในช่วงเวลาสำคัญของนักศึกษาสายวิทยาการคอมพิวเตอร์
+          </span>
+        </div>
+
+        <div className="terminal-strip" aria-hidden="true">
+          {codeLines.map((line, index) => (
+            <p key={line} style={{ animationDelay: `${2.35 + index * 0.2}s` }}>
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              {line}
+            </p>
+          ))}
+        </div>
+
+        <div className="node-map" aria-hidden="true">
+          {nodes.map((node, index) => (
+            <span
+              key={`${node.top}-${node.left}`}
+              style={{
+                top: node.top,
+                left: node.left,
+                animationDelay: `${1.8 + index * 0.16}s`,
+              }}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          ))}
         </div>
-      </main>
-    </div>
+      </section>
+    </main>
   );
 }

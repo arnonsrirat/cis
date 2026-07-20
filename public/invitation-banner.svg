@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" role="img" aria-labelledby="title desc">
+  <title id="title">Computer science invitation banner</title>
+  <desc id="desc">A cinematic computer science invitation banner placeholder with circuit lines, code, and glowing panels.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#07111f"/>
+      <stop offset="0.48" stop-color="#102a35"/>
+      <stop offset="1" stop-color="#150c24"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" x2="1">
+      <stop offset="0" stop-color="#54e8ff" stop-opacity="0.78"/>
+      <stop offset="0.52" stop-color="#b8ff6a" stop-opacity="0.42"/>
+      <stop offset="1" stop-color="#ff6aa8" stop-opacity="0.78"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="12" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <pattern id="grid" width="64" height="64" patternUnits="userSpaceOnUse">
+      <path d="M64 0H0v64" fill="none" stroke="#54e8ff" stroke-opacity="0.12" stroke-width="2"/>
+    </pattern>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#bg)"/>
+  <rect width="1920" height="1080" fill="url(#grid)"/>
+  <circle cx="356" cy="220" r="310" fill="#54e8ff" opacity="0.13"/>
+  <circle cx="1570" cy="830" r="360" fill="#ff6aa8" opacity="0.12"/>
+  <path d="M155 705H440l96-118h286l72-95h230l78 104h268l90-130h205" fill="none" stroke="url(#panel)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)"/>
+  <path d="M210 330h250l80 80h270l60-60h230l76 76h190l92-120h250" fill="none" stroke="#54e8ff" stroke-opacity="0.42" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <g filter="url(#glow)">
+    <circle cx="155" cy="705" r="12" fill="#b8ff6a"/>
+    <circle cx="536" cy="587" r="14" fill="#54e8ff"/>
+    <circle cx="894" cy="492" r="11" fill="#ff6aa8"/>
+    <circle cx="1470" cy="596" r="13" fill="#b8ff6a"/>
+    <circle cx="1765" cy="466" r="12" fill="#54e8ff"/>
+  </g>
+  <g opacity="0.85">
+    <rect x="250" y="214" width="610" height="350" rx="20" fill="#06101d" fill-opacity="0.76" stroke="#54e8ff" stroke-opacity="0.36"/>
+    <circle cx="295" cy="254" r="9" fill="#ff6aa8"/>
+    <circle cx="327" cy="254" r="9" fill="#ffd166"/>
+    <circle cx="359" cy="254" r="9" fill="#b8ff6a"/>
+    <text x="295" y="324" fill="#54e8ff" font-family="Consolas, monospace" font-size="34">const event = "CS Ceremony";</text>
+    <text x="295" y="386" fill="#f6fbff" fill-opacity="0.9" font-family="Consolas, monospace" font-size="34">await professor.join();</text>
+    <text x="295" y="448" fill="#b8ff6a" font-family="Consolas, monospace" font-size="34">status: honored_guest</text>
+    <text x="295" y="510" fill="#ff6aa8" font-family="Consolas, monospace" font-size="34">render(memory);</text>
+  </g>
+  <g transform="translate(1115 255)">
+    <rect x="0" y="0" width="560" height="460" rx="28" fill="#f6fbff" fill-opacity="0.07" stroke="#f6fbff" stroke-opacity="0.24"/>
+    <path d="M92 286c0-109 83-198 186-198s186 89 186 198" fill="none" stroke="#54e8ff" stroke-width="16" stroke-linecap="round" opacity="0.8"/>
+    <path d="M148 286c0-76 58-138 130-138s130 62 130 138" fill="none" stroke="#b8ff6a" stroke-width="12" stroke-linecap="round" opacity="0.75"/>
+    <path d="M214 286c0-39 29-70 64-70s64 31 64 70" fill="none" stroke="#ff6aa8" stroke-width="10" stroke-linecap="round" opacity="0.8"/>
+    <rect x="120" y="322" width="320" height="42" rx="21" fill="#54e8ff" opacity="0.78"/>
+    <rect x="176" y="386" width="208" height="18" rx="9" fill="#b8ff6a" opacity="0.72"/>
+  </g>
+  <text x="250" y="865" fill="#f6fbff" font-family="Arial, sans-serif" font-size="76" font-weight="700">Computer Science Invitation</text>
+  <text x="254" y="930" fill="#f6fbff" fill-opacity="0.72" font-family="Arial, sans-serif" font-size="34">Faculty honor guest sequence initialized</text>
+</svg>
