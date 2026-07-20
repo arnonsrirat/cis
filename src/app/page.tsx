@@ -466,7 +466,7 @@ export default function Home() {
         return;
       }
       
-      current += 2;
+      current += 1;
       setDecryptProgress(current);
       
       if (soundEngineRef.current) {
@@ -474,7 +474,7 @@ export default function Home() {
       }
       
       // Speed up delay exponentially as progress reaches 100%
-      const delay = Math.max(10, 48 - (current * 0.42)); 
+      const delay = Math.max(15, 80 - (current * 0.65)); 
       setTimeout(tick, delay);
     };
     
@@ -506,7 +506,7 @@ export default function Home() {
         
         return nextVal;
       });
-    }, 90);
+    }, 140);
 
     return () => clearInterval(interval);
   }, [stage, replayKey]);
@@ -733,8 +733,8 @@ export default function Home() {
               <div 
                 className="story-copy" 
                 style={{ 
-                  opacity: (progress >= 10 && progress < 85) ? 1 : 0, 
-                  transform: (progress >= 10 && progress < 85) ? "translateY(0)" : "translateY(15px)",
+                  opacity: (progress >= 10 && progress < 92) ? 1 : 0, 
+                  transform: (progress >= 10 && progress < 92) ? "translateY(0)" : "translateY(15px)",
                   transition: "opacity 1.2s ease, transform 1.2s ease",
                   left: "6%",
                   bottom: "12%"
@@ -753,8 +753,8 @@ export default function Home() {
               <div 
                 className="terminal-strip" 
                 style={{ 
-                  opacity: (progress >= 30 && progress < 85) ? 1 : 0, 
-                  transform: (progress >= 30 && progress < 85) ? "translateY(0)" : "translateY(-10px)",
+                  opacity: (progress >= 30 && progress < 92) ? 1 : 0, 
+                  transform: (progress >= 30 && progress < 92) ? "translateY(0)" : "translateY(-10px)",
                   transition: "opacity 1s ease, transform 1s ease",
                   right: "6%",
                   top: "12%"
