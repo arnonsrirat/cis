@@ -78,11 +78,33 @@ class SoundEngine {
     });
   }
 
+  playArpeggio() {
+    if (!this.ctx || this.isMuted) return;
+    const now = this.ctx.currentTime;
+    const notes = [261.63, 329.63, 392.00, 523.25]; // C4, E4, G4, C5
+    notes.forEach((freq, idx) => {
+      if (!this.ctx) return;
+      const osc = this.ctx.createOscillator();
+      const gainNode = this.ctx.createGain();
+      
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+      
+      gainNode.gain.setValueAtTime(0, now + idx * 0.08);
+      gainNode.gain.linearRampToValueAtTime(0.08, now + idx * 0.08 + 0.02);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.25);
+      
+      osc.connect(gainNode);
+      gainNode.connect(this.masterGain!);
+      osc.start(now + idx * 0.08);
+      osc.stop(now + idx * 0.08 + 0.3);
+    });
+  }
+
   playSweep() {
     if (!this.ctx || this.isMuted) return;
     const now = this.ctx.currentTime;
     
-    // Cyber sweep sound
     const osc = this.ctx.createOscillator();
     const gainNode = this.ctx.createGain();
     const filter = this.ctx.createBiquadFilter();
@@ -107,26 +129,178 @@ class SoundEngine {
     osc.stop(now + 2.2);
   }
 
-  playClick() {
+  playDecryptTick(pct: number) {
     if (!this.ctx || this.isMuted) return;
     const now = this.ctx.currentTime;
-    
-    // Technical beep click for line prints
     const osc = this.ctx.createOscillator();
     const gainNode = this.ctx.createGain();
 
     osc.type = "sine";
-    osc.frequency.setValueAtTime(1600, now);
-    osc.frequency.exponentialRampToValueAtTime(800, now + 0.04);
+    // Pitch increases as percentage goes up (from 350Hz to 1250Hz)
+    const baseFreq = 350 + (pct * 9);
+    osc.frequency.setValueAtTime(baseFreq, now);
+    osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.7, now + 0.04);
 
-    gainNode.gain.setValueAtTime(0.05, now);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+    gainNode.gain.setValueAtTime(0.06, now);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
 
     osc.connect(gainNode);
     gainNode.connect(this.masterGain!);
 
     osc.start();
-    osc.stop(now + 0.06);
+    osc.stop(now + 0.05);
+  }
+
+  playSubBass() {
+    if (!this.ctx || this.isMuted) return;
+    const now = this.ctx.currentTime;
+    
+    // Sub bass drop
+    const osc = this.ctx.createOscillator();
+    const gainNode = this.ctx.createGain();
+    
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(120, now);
+    osc.frequency.exponentialRampToValueAtTime(45, now + 0.8);
+    
+    gainNode.gain.setValueAtTime(0, now);
+    gainNode.gain.linearRampToValueAtTime(0.6, now + 0.05);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.95);
+    
+    osc.connect(gainNode);
+    gainNode.connect(this.masterGain!);
+    osc.start();
+    osc.stop(now + 1.0);
+
+    // Filtered noise pop
+    const bufferSize = this.ctx.sampleRate * 0.15;
+    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+    const noise = this.ctx.createBufferSource();
+    noise.buffer = buffer;
+
+    const noiseFilter = this.ctx.createBiquadFilter();
+    noiseFilter.type = "lowpass";
+    noiseFilter.frequency.setValueAtTime(180, now);
+
+    const noiseGain = this.ctx.createGain();
+    noiseGain.gain.setValueAtTime(0.2, now);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+
+    noise.connect(noiseFilter);
+    noiseFilter.connect(noiseGain);
+    noiseGain.connect(this.masterGain!);
+    noise.start();
+  }
+
+  playSealBreak() {
+    if (!this.ctx || this.isMuted) return;
+    const now = this.ctx.currentTime;
+
+    // Crackle sound
+    const bufferSize = this.ctx.sampleRate * 0.08;
+    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+    const noise = this.ctx.createBufferSource();
+    noise.buffer = buffer;
+
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = "highpass";
+    filter.frequency.setValueAtTime(1500, now);
+
+    const gain = this.ctx.createGain();
+    gain.gain.setValueAtTime(0.25, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.masterGain!);
+
+    noise.start();
+  }
+
+  playWhoosh() {
+    if (!this.ctx || this.isMuted) return;
+    const now = this.ctx.currentTime;
+    
+    // Whoosh filter sweep
+    const bufferSize = this.ctx.sampleRate * 1.5;
+    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+    const noise = this.ctx.createBufferSource();
+    noise.buffer = buffer;
+
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.Q.setValueAtTime(3.0, now);
+    filter.frequency.setValueAtTime(100, now);
+    filter.frequency.exponentialRampToValueAtTime(850, now + 1.2);
+
+    const gain = this.ctx.createGain();
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.18, now + 0.4);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 1.4);
+
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.masterGain!);
+
+    noise.start();
+  }
+
+  playClick(pitch?: number) {
+    if (!this.ctx || this.isMuted) return;
+    const now = this.ctx.currentTime;
+    
+    const osc = this.ctx.createOscillator();
+    const gainNode = this.ctx.createGain();
+
+    osc.type = "sine";
+    const freq = pitch || 1500;
+    osc.frequency.setValueAtTime(freq, now);
+    osc.frequency.exponentialRampToValueAtTime(freq * 0.5, now + 0.03);
+
+    gainNode.gain.setValueAtTime(0.04, now);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+
+    osc.connect(gainNode);
+    gainNode.connect(this.masterGain!);
+
+    osc.start();
+    osc.stop(now + 0.04);
+  }
+
+  playSuccess() {
+    if (!this.ctx || this.isMuted) return;
+    const now = this.ctx.currentTime;
+    // Major 7th chord chime (C5, E5, G5, B5)
+    const notes = [523.25, 659.25, 783.99, 987.77];
+    notes.forEach((freq, idx) => {
+      if (!this.ctx) return;
+      const osc = this.ctx.createOscillator();
+      const gainNode = this.ctx.createGain();
+
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(freq, now + idx * 0.04);
+
+      gainNode.gain.setValueAtTime(0, now + idx * 0.04);
+      gainNode.gain.linearRampToValueAtTime(0.05, now + idx * 0.04 + 0.02);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.04 + 0.6);
+
+      osc.connect(gainNode);
+      gainNode.connect(this.masterGain!);
+      osc.start(now + idx * 0.04);
+      osc.stop(now + idx * 0.04 + 0.7);
+    });
   }
 
   stopAll() {
@@ -141,6 +315,66 @@ class SoundEngine {
       this.initialized = false;
     }
   }
+}
+
+// Custom text scrambling component simulating a matrix decrypter
+function ScrambledText({ 
+  text, 
+  speed = 30, 
+  delay = 0, 
+  trigger = false 
+}: { 
+  text: string; 
+  speed?: number; 
+  delay?: number; 
+  trigger: boolean 
+}) {
+  const [displayText, setDisplayText] = useState("");
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%^&*()_+{}|:<>?";
+
+  useEffect(() => {
+    if (!trigger) {
+      setDisplayText("");
+      return;
+    }
+
+    let isMounted = true;
+    let iteration = 0;
+    const originalText = text;
+    
+    const startTimeout = setTimeout(() => {
+      const interval = setInterval(() => {
+        if (!isMounted) return;
+
+        setDisplayText(
+          originalText
+            .split("")
+            .map((char, index) => {
+              if (index < iteration) {
+                return originalText[index];
+              }
+              if (char === " ") return " ";
+              return chars[Math.floor(Math.random() * chars.length)];
+            })
+            .join("")
+        );
+
+        if (iteration >= originalText.length) {
+          clearInterval(interval);
+        }
+        iteration += 1 / 3;
+      }, speed);
+
+      return () => clearInterval(interval);
+    }, delay);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(startTimeout);
+    };
+  }, [text, speed, delay, trigger]);
+
+  return <span>{displayText || " "}</span>;
 }
 
 const codeLines = [
@@ -175,6 +409,12 @@ export default function Home() {
   const [replayKey, setReplayKey] = useState(0);
   const [bannerUrl, setBannerUrl] = useState<string | null>(null);
 
+  // Audio-visual dramatic state triggers
+  const [isShaking, setIsShaking] = useState(false);
+  const [isFlashing, setIsFlashing] = useState(false);
+  const [showRipple, setShowRipple] = useState(false);
+  const [isGlitching, setIsGlitching] = useState(false);
+
   const soundEngineRef = useRef<SoundEngine | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -204,29 +444,42 @@ export default function Home() {
     }
   }, [replayKey, stage]);
 
-  // Decryption progress logic
+  // Decryption progress logic with dynamic ticking speed-up
   useEffect(() => {
     if (stage !== "decrypting") return;
     
     setDecryptProgress(0);
-    const interval = setInterval(() => {
-      setDecryptProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setTimeout(() => {
-            setStage("envelope");
-          }, 400);
-          return 100;
-        }
-        // Small click sounds during decryption ticks
-        if (prev % 15 === 0 && soundEngineRef.current) {
-          soundEngineRef.current.playClick();
-        }
-        return prev + 2;
-      });
-    }, 40);
-
-    return () => clearInterval(interval);
+    let current = 0;
+    
+    const tick = () => {
+      if (current >= 100) {
+        // Trigger visual boom effects
+        soundEngineRef.current?.playSubBass();
+        setIsFlashing(true);
+        setIsShaking(true);
+        setTimeout(() => setIsFlashing(false), 250);
+        setTimeout(() => setIsShaking(false), 600);
+        
+        setTimeout(() => {
+          setStage("envelope");
+        }, 500);
+        return;
+      }
+      
+      current += 2;
+      setDecryptProgress(current);
+      
+      if (soundEngineRef.current) {
+        soundEngineRef.current.playDecryptTick(current);
+      }
+      
+      // Speed up delay exponentially as progress reaches 100%
+      const delay = Math.max(10, 48 - (current * 0.42)); 
+      setTimeout(tick, delay);
+    };
+    
+    const startTimeout = setTimeout(tick, 300);
+    return () => clearTimeout(startTimeout);
   }, [stage]);
 
   // Timeline progress logic for card display
@@ -244,15 +497,16 @@ export default function Home() {
         }
         const nextVal = prev + 1;
         
-        // Trigger code lines typed sounds and appearance at specific timeline milestones
-        if (nextVal === 15) { setActiveCodeLine(0); soundEngineRef.current?.playClick(); }
-        if (nextVal === 30) { setActiveCodeLine(1); soundEngineRef.current?.playClick(); }
-        if (nextVal === 45) { setActiveCodeLine(2); soundEngineRef.current?.playClick(); }
-        if (nextVal === 60) { setActiveCodeLine(3); soundEngineRef.current?.playClick(); }
+        // Trigger code lines typed sounds (random typing clicks) and appearance
+        if (nextVal === 15) { setActiveCodeLine(0); soundEngineRef.current?.playClick(1200 + Math.random() * 400); }
+        if (nextVal === 30) { setActiveCodeLine(1); soundEngineRef.current?.playClick(1300 + Math.random() * 400); }
+        if (nextVal === 45) { setActiveCodeLine(2); soundEngineRef.current?.playClick(1400 + Math.random() * 400); }
+        if (nextVal === 60) { setActiveCodeLine(3); soundEngineRef.current?.playClick(1500 + Math.random() * 400); }
+        if (nextVal === 100) { soundEngineRef.current?.playSuccess(); }
         
         return nextVal;
       });
-    }, 90); // ~9 seconds total card reveal timeline
+    }, 90);
 
     return () => clearInterval(interval);
   }, [stage, replayKey]);
@@ -261,21 +515,38 @@ export default function Home() {
     setAudioEnabled(true);
     setStage("decrypting");
     setTimeout(() => {
-      soundEngineRef.current?.playSweep();
-    }, 200);
+      soundEngineRef.current?.playArpeggio();
+    }, 150);
   };
 
   const handleOpenEnvelope = () => {
     setStage("opening");
-    soundEngineRef.current?.playSweep();
+    soundEngineRef.current?.playSealBreak();
+    setShowRipple(true);
+    setIsShaking(true);
+    
+    setTimeout(() => {
+      setShowRipple(false);
+      setIsShaking(false);
+    }, 850);
+
+    // Play whoosh sound when envelope opens
+    setTimeout(() => {
+      soundEngineRef.current?.playWhoosh();
+    }, 300);
+
     setTimeout(() => {
       setStage("card");
-    }, 1800); // Wait for flap and card slide animations to complete
+      setIsGlitching(true);
+      setTimeout(() => setIsGlitching(false), 500);
+    }, 1800);
   };
 
   const handleReplay = () => {
     setReplayKey((k) => k + 1);
     soundEngineRef.current?.playSweep();
+    setIsGlitching(true);
+    setTimeout(() => setIsGlitching(false), 450);
   };
 
   // Direct DOM manipulation for tilt glare effect (prevents React re-renders)
@@ -285,7 +556,6 @@ export default function Home() {
     const rect = card.getBoundingClientRect();
     const x = e.clientX - rect.left - rect.width / 2;
     const y = e.clientY - rect.top - rect.height / 2;
-    // Rotate cards slightly based on cursor
     const rotateX = -(y / (rect.height / 2)) * 8;
     const rotateY = (x / (rect.width / 2)) * 8;
     card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
@@ -299,6 +569,9 @@ export default function Home() {
 
   return (
     <main className={`invite-film ${stage === "opening" || stage === "card" ? "is-open" : ""} ${stage === "card" ? "is-cinematic" : ""}`}>
+      {/* Fullscreen VFX overlays */}
+      <div className={`flash-overlay ${isFlashing ? "active" : ""}`} />
+      <div className={`glitch-interference ${isGlitching ? "active" : ""}`} />
       <div className="film-grain" />
       <div className="matrix-grid" />
       <div className="scanlines-overlay" />
@@ -357,8 +630,12 @@ export default function Home() {
         <section className="intro-stage" aria-label="ยืนยันการรับรหัสสัญญาณการ์ดเชิญ">
           <div className="intro-console">
             <div className="intro-laser" />
-            <div className="intro-status-code">Security protocol encrypted</div>
-            <h1 className="intro-title font-sans">CIS INVITATION</h1>
+            <div className="intro-status-code">
+              <ScrambledText text="Security protocol encrypted" trigger={true} speed={25} />
+            </div>
+            <h1 className="intro-title font-sans">
+              <ScrambledText text="CIS INVITATION" trigger={true} speed={40} delay={300} />
+            </h1>
             <p className="intro-desc">
               ระบบส่งสัญญาณการ์ดเชิญส่วนบุคคลสำหรับอาจารย์สาขาวิทยาการคอมพิวเตอร์และสารสนเทศ (CIS) <br />
               กรุณากดปุ่มด้านล่างเพื่อเริ่มถอดรหัสสัญญาณสัญญาณเข้าสู่ระบบ
@@ -373,7 +650,7 @@ export default function Home() {
       {/* Stage 2: Decrypting Loader animation */}
       {stage === "decrypting" && (
         <section className="intro-stage" aria-label="กำลังถอดรหัสข้อมูล">
-          <div className="intro-console">
+          <div className={`intro-console ${isShaking ? "active" : ""}`}>
             <div className="intro-laser" />
             <div className="intro-status-code">DECRYPTING PACKETS...</div>
             <div className="decrypting-container">
@@ -392,30 +669,33 @@ export default function Home() {
       {/* Stage 3: Envelope Stage */}
       {(stage === "envelope" || stage === "opening") && (
         <section className={`envelope-stage ${stage === "opening" ? "is-open" : ""}`} aria-label="ซองการ์ดเชิญอาจารย์">
-          <button
-            className="envelope-button"
-            type="button"
-            onClick={handleOpenEnvelope}
-            disabled={stage === "opening"}
-            aria-label="แตะเพื่อเปิดการ์ดเชิญ"
-          >
-            <span className="tap-light" />
-            <span className="invite-card-peek">
-              <span className="peek-grid" />
-              <span className="peek-title">CIS INVITATION</span>
-              <span className="peek-line" />
-              <span className="peek-line short" />
-            </span>
-            <span className="envelope-back" />
-            <span className="envelope-left" />
-            <span className="envelope-right" />
-            <span className="envelope-front" />
-            <span className="envelope-flap" />
-            <span className="wax-seal">
-              <span>CIS</span>
-            </span>
-            <span className="tap-copy">แตะเพื่อเปิดการ์ดเชิญ</span>
-          </button>
+          <div className={`shake-container ${isShaking ? "active" : ""}`}>
+            <button
+              className="envelope-button"
+              type="button"
+              onClick={handleOpenEnvelope}
+              disabled={stage === "opening"}
+              aria-label="แตะเพื่อเปิดการ์ดเชิญ"
+            >
+              {showRipple && <span className="seal-ripple" />}
+              <span className="tap-light" />
+              <span className="invite-card-peek">
+                <span className="peek-grid" />
+                <span className="peek-title">CIS INVITATION</span>
+                <span className="peek-line" />
+                <span className="peek-line short" />
+              </span>
+              <span className="envelope-back" />
+              <span className="envelope-left" />
+              <span className="envelope-right" />
+              <span className="envelope-front" />
+              <span className="envelope-flap" />
+              <span className="wax-seal">
+                <span>CIS</span>
+              </span>
+              <span className="tap-copy">แตะเพื่อเปิดการ์ดเชิญ</span>
+            </button>
+          </div>
         </section>
       )}
 
@@ -463,7 +743,9 @@ export default function Home() {
                 }}
               >
                 <p>FACULTY INVITATION SEQUENCE</p>
-                <h1 className="font-sans text-white text-shadow-md">ขอเรียนเชิญอาจารย์เข้าร่วมงาน</h1>
+                <h1 className="font-sans text-white text-shadow-md">
+                  <ScrambledText text="ขอเรียนเชิญอาจารย์เข้าร่วมงาน" trigger={progress >= 10} speed={25} />
+                </h1>
                 <span className="text-gray-200">
                   ร่วมเป็นเกียรติในช่วงเวลาสำคัญของนักศึกษาสาขาวิทยาการคอมพิวเตอร์และสารสนเทศ (CIS)
                 </span>
@@ -490,7 +772,7 @@ export default function Home() {
                     }}
                   >
                     <span>{String(index + 1).padStart(2, "0")}</span>
-                    {line}
+                    <ScrambledText text={line} trigger={activeCodeLine >= index} speed={15} />
                   </p>
                 ))}
               </div>

@@ -1360,3 +1360,129 @@ select {
   }
 }
 
+/* --- High-end Audio-Visual Redesign VFX --- */
+
+/* Fullscreen Flash Overlay */
+.flash-overlay {
+  position: fixed;
+  inset: 0;
+  background: #ffffff;
+  z-index: 200;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.05s ease-out;
+}
+
+.flash-overlay.active {
+  opacity: 0.95;
+  transition: none;
+}
+
+/* Console Shake Effect */
+.shake-container {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.shake-container.active {
+  animation: console-shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+@keyframes console-shake {
+  10%, 90% { transform: translate3d(-3px, -1px, 0) rotate(-0.5deg); }
+  20%, 80% { transform: translate3d(4px, 2px, 0) rotate(1deg); }
+  30%, 50%, 70% { transform: translate3d(-8px, -1px, 0) rotate(-1.5deg); }
+  40%, 60% { transform: translate3d(8px, 1px, 0) rotate(1.5deg); }
+}
+
+/* Seal Shockwave Ripple */
+.seal-ripple {
+  position: absolute;
+  top: 57%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  width: 74px;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  border: 4px solid var(--rose);
+  background: rgba(255, 106, 168, 0.2);
+  box-shadow: 0 0 30px var(--rose);
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0.8;
+  animation: ripple-out 0.9s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+}
+
+@keyframes ripple-out {
+  0% {
+    transform: translate(-50%, -50%) scale(0.6);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(4.5);
+    opacity: 0;
+    filter: blur(4px);
+  }
+}
+
+/* Interactive hover wax-seal ripple pulse */
+.envelope-button:hover .wax-seal {
+  transform: translate(-50%, -50%) scale(1.08);
+  box-shadow: 
+    0 12px 30px rgba(0, 0, 0, 0.35),
+    0 0 45px rgba(255, 106, 168, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+/* Hologram Glitch/Interference scanlines overlay on entry */
+.glitch-interference {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  pointer-events: none;
+  background: rgba(84, 232, 255, 0.05);
+  opacity: 0;
+}
+
+.glitch-interference.active {
+  animation: glitch-flash 0.6s steps(2, start) forwards;
+}
+
+@keyframes glitch-flash {
+  0% { opacity: 0.8; background: rgba(84, 232, 255, 0.15); filter: hue-rotate(90deg); }
+  20% { opacity: 0.1; }
+  40% { opacity: 0.9; background: rgba(255, 106, 168, 0.15); filter: contrast(1.5); }
+  60% { opacity: 0.2; }
+  80% { opacity: 0.7; background: rgba(184, 255, 106, 0.15); }
+  100% { opacity: 0; }
+}
+
+/* Floating focal camera corner indicator */
+.card-stage::before {
+  content: "";
+  position: absolute;
+  inset: 15% 10%;
+  border: 1px solid rgba(84, 232, 255, 0.05);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Glow point on progress bar */
+.timeline-slider-fill::after {
+  content: "";
+  position: absolute;
+  right: -4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  background: var(--lime);
+  border-radius: 999px;
+  box-shadow: 0 0 10px var(--lime), 0 0 20px var(--lime);
+}
+
+
