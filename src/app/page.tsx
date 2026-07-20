@@ -735,8 +735,8 @@ export default function Home() {
               <div 
                 className="story-copy" 
                 style={{ 
-                  opacity: progress >= 10 ? 1 : 0, 
-                  transform: progress >= 10 ? "translateY(0)" : "translateY(15px)",
+                  opacity: (progress >= 10 && progress < 85) ? 1 : 0, 
+                  transform: (progress >= 10 && progress < 85) ? "translateY(0)" : "translateY(15px)",
                   transition: "opacity 1.2s ease, transform 1.2s ease",
                   left: "6%",
                   bottom: "12%"
@@ -755,8 +755,9 @@ export default function Home() {
               <div 
                 className="terminal-strip" 
                 style={{ 
-                  opacity: progress >= 30 ? 1 : 0, 
-                  transition: "opacity 1s ease",
+                  opacity: (progress >= 30 && progress < 85) ? 1 : 0, 
+                  transform: (progress >= 30 && progress < 85) ? "translateY(0)" : "translateY(-10px)",
+                  transition: "opacity 1s ease, transform 1s ease",
                   right: "6%",
                   top: "12%"
                 }}
