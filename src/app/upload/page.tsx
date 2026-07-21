@@ -1,191 +1,254 @@
 "use client";
 
-/* eslint-disable @next/next/no-img-element */
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ChangeEvent, FormEvent, useState } from "react";
 
 export default function UploadPage() {
-  const [errorMessage, setErrorMessage] = useState("");
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passcode, setPasscode] = useState("");
-  const [previewUrl, setPreviewUrl] = useState<string | null>(() => {
-    if (typeof window === "undefined") {
-      return null;
-    }
-
-    return localStorage.getItem("invitation_banner");
-  });
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isSuccess, setIsSuccess] = useState(false);
 
-  const handleLogin = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    if (passcode === "cis69") {
-      setErrorMessage("");
-      setIsAuthenticated(true);
-      return;
+  // Load existing banner preview on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("invitation_banner");
+      if (stored) {
+        setPreviewUrl(stored);
+      }
     }
+  }, []);
 
-    setErrorMessage("รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง");
-    setIsAuthenticated(false);
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passcode === "cis69") {
+      setIsAuthenticated(true);
+      setErrorMessage("");
+    } else {
+      setErrorMessage("รหัสผ่านไม่ถูกต้อง! กรุณาลองใหม่อีกครั้ง");
+      setIsAuthenticated(false);
+    }
   };
 
-  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    if (!file) {
-      return;
-    }
-
-    if (!["image/png", "image/jpeg", "image/jpg"].includes(file.type)) {
-      alert("กรุณาเลือกเฉพาะไฟล์รูปภาพ .png, .jpeg, .jpg เท่านั้น");
+    // Check file type
+    const validTypes = ["image/png", "image/jpeg", "image/jpg"];
+    if (!validTypes.includes(file.type)) {
+      alert("กรุณาเลือกเฉพาะไฟล์รูปภาพ .png, .jpeg, .jpg เท่านั้น!");
       return;
     }
 
     setSelectedFile(file);
-    setPreviewUrl(URL.createObjectURL(file));
+
+    // Create a local object URL for instant preview before compressing
+    const localUrl = URL.createObjectURL(file);
+    setPreviewUrl(localUrl);
+    setIsSuccess(false);
   };
 
   const handleSave = () => {
     if (!selectedFile) {
-      alert("กรุณาเลือกไฟล์รูปภาพก่อนบันทึก");
+      alert("กรุณาเลือกไฟล์รูปภาพก่อนทำการบันทึก!");
       return;
     }
 
     const reader = new FileReader();
-
     reader.onload = (event) => {
-      const image = new Image();
-
-      image.onload = () => {
+      const img = new Image();
+      img.onload = () => {
         const canvas = document.createElement("canvas");
-        const maxSize = 1920;
-        let width = image.width;
-        let height = image.height;
+        let width = img.width;
+        let height = img.height;
 
-        if (width > maxSize || height > maxSize) {
+        // Resize image to max 1920px dimensions if larger
+        const maxDim = 1920;
+        if (width > maxDim || height > maxDim) {
           if (width > height) {
-            height = Math.round((height * maxSize) / width);
-            width = maxSize;
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
           } else {
-            width = Math.round((width * maxSize) / height);
-            height = maxSize;
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
           }
         }
 
         canvas.width = width;
         canvas.height = height;
-        canvas.getContext("2d")?.drawImage(image, 0, 0, width, height);
+        const ctx = canvas.getContext("2d");
+        ctx?.drawImage(img, 0, 0, width, height);
+
+        // Compress image to JPEG at 0.7 quality to stay under 5MB localStorage limit
+        const compressedBase64 = canvas.toDataURL("image/jpeg", 0.7);
 
         try {
-          localStorage.setItem("invitation_banner", canvas.toDataURL("image/jpeg", 0.7));
-          alert("บันทึกรูปภาพเรียบร้อยแล้ว");
-        } catch {
-          alert("ไม่สามารถบันทึกรูปภาพได้ เนื่องจากไฟล์ใหญ่เกินไป");
+          localStorage.setItem("invitation_banner", compressedBase64);
+          setIsSuccess(true);
+          alert("บันทึกการปรับปรุงรูปภาพการ์ดเรียบร้อยแล้ว!");
+        } catch (e) {
+          console.error(e);
+          alert("ไม่สามารถบันทึกรูปภาพได้ เนื่องจากขนาดไฟล์ใหญ่เกินขีดจำกัดหน่วยความจำ");
         }
       };
-
-      image.src = String(event.target?.result ?? "");
+      img.src = event.target?.result as string;
     };
-
     reader.readAsDataURL(selectedFile);
   };
 
   const handleReset = () => {
-    if (!confirm("ต้องการคืนค่ารูปภาพกลับเป็นค่าเริ่มต้นใช่หรือไม่?")) {
-      return;
+    if (confirm("ต้องการคืนค่าภาพแบนเนอร์การ์ดกลับสู่ภาพเริ่มต้นใช่หรือไม่?")) {
+      localStorage.removeItem("invitation_banner");
+      setPreviewUrl(null);
+      setSelectedFile(null);
+      setIsSuccess(false);
+      alert("คืนค่าภาพแบนเนอร์เริ่มต้นเรียบร้อยแล้ว!");
     }
-
-    localStorage.removeItem("invitation_banner");
-    setPreviewUrl(null);
-    setSelectedFile(null);
-    alert("คืนค่าเรียบร้อยแล้ว");
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-950 p-6 text-white">
-      <section className="w-full max-w-md rounded-xl border border-cyan-500/20 bg-slate-900/80 p-8 shadow-2xl">
-        <div className="mb-6 text-center">
-          <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-cyan-400">
-            จัดการรูปภาพ
-          </p>
-          <h1 className="text-2xl font-bold">อัปโหลดรูปภาพ Invitation</h1>
+    <main className="invite-film flex flex-col justify-center items-center p-6 bg-slate-950 min-h-screen">
+      <div className="film-grain" />
+      <div className="matrix-grid" />
+      <div className="scanlines-overlay" />
+
+      {/* Cyber/Cinematic framing bars */}
+      <div className="cinematic-letterbox top" style={{ transform: "translateY(0)" }} />
+      <div className="cinematic-letterbox bottom" style={{ transform: "translateY(0)" }} />
+
+      <div className="z-10 w-full max-w-md bg-slate-900/80 border border-cyan-500/20 rounded-xl p-8 backdrop-blur-xl shadow-2xl">
+        <div className="text-center mb-6">
+          <div className="font-mono text-xs text-cyan-400 uppercase tracking-widest mb-1">
+            System Administration
+          </div>
+          <h1 className="text-2xl font-bold text-white tracking-tight font-sans">
+            CIS INVITATION CONSOLE
+          </h1>
+          <div className="h-0.5 w-16 bg-cyan-500 mx-auto mt-3" />
         </div>
 
         {!isAuthenticated ? (
-          <form className="space-y-4" onSubmit={handleLogin}>
-            <label className="block">
-              <span className="text-sm text-slate-300">รหัสผ่าน</span>
+          // Verification Passcode Form
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-2">
+              <label className="block text-xs font-mono text-gray-400 uppercase tracking-wider">
+                Enter Console Passcode
+              </label>
               <input
-                className="mt-2 w-full rounded-lg border border-cyan-500/30 bg-slate-950 px-4 py-3 text-center text-white outline-none focus:border-cyan-400"
-                onChange={(event) => setPasscode(event.target.value)}
-                placeholder="กรอกรหัสผ่าน"
-                required
                 type="password"
+                required
+                placeholder="••••••"
                 value={passcode}
+                onChange={(e) => setPasscode(e.target.value)}
+                className="w-full bg-slate-950 border border-cyan-500/30 rounded-lg py-3 px-4 text-center text-white tracking-widest focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400 transition"
               />
-            </label>
+            </div>
 
-            {errorMessage ? (
-              <p className="text-center text-sm text-rose-400">{errorMessage}</p>
-            ) : null}
+            {errorMessage && (
+              <p className="text-rose-400 text-xs text-center font-mono">
+                {errorMessage}
+              </p>
+            )}
 
             <button
-              className="w-full rounded-lg border border-cyan-400/50 bg-cyan-500/10 py-3 font-semibold text-cyan-300 hover:bg-cyan-500/20"
               type="submit"
+              className="w-full bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-400/50 rounded-lg py-3 font-semibold font-mono text-sm tracking-wide transition active:scale-[0.98]"
             >
-              เข้าสู่หน้าจัดการ
+              ACCESS CONSOLE
             </button>
           </form>
         ) : (
-          <div className="space-y-5">
-            <label className="block">
-              <span className="text-sm text-slate-300">เลือกรูปภาพ</span>
-              <input
-                accept=".png,.jpg,.jpeg"
-                className="mt-2 w-full rounded-lg border border-cyan-500/30 bg-slate-950 px-3 py-2 text-sm"
-                onChange={handleFileChange}
-                type="file"
-              />
-            </label>
-
-            {previewUrl ? (
-              <div>
-                <p className="mb-2 text-sm text-slate-300">ตัวอย่างรูปภาพ</p>
-                <img
-                  alt="ตัวอย่างรูปภาพ"
-                  className="aspect-video w-full rounded-lg border border-cyan-500/30 object-cover"
-                  src={previewUrl}
-                />
+          // File Upload Form
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <label className="block text-xs font-mono text-gray-400 uppercase tracking-wider">
+                Upload Invitation Banner
+              </label>
+              <div className="flex items-center justify-center w-full">
+                <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-cyan-500/30 hover:border-cyan-400/60 bg-slate-950 rounded-lg cursor-pointer transition">
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <svg
+                      className="w-8 h-8 mb-3 text-cyan-400"
+                      aria-hidden="true"
+                      fill="none"
+                      viewBox="0 0 20 16"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+                      />
+                    </svg>
+                    <p className="mb-2 text-sm text-gray-300">
+                      <span className="font-semibold text-cyan-400">Click to upload</span> or drag and drop
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      PNG, JPG or JPEG (Max 1920x1080)
+                    </p>
+                  </div>
+                  <input
+                    type="file"
+                    accept=".png,.jpg,.jpeg"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                </label>
               </div>
-            ) : null}
+            </div>
 
-            <div className="space-y-3">
+            {previewUrl && (
+              <div className="space-y-2">
+                <span className="block text-xs font-mono text-gray-400 uppercase tracking-wider">
+                  Banner Image Preview
+                </span>
+                <div className="relative aspect-video rounded-lg overflow-hidden border border-cyan-500/30">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={previewUrl}
+                    alt="Banner Preview"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-3 pt-2">
               <button
-                className="w-full rounded-lg bg-cyan-400 py-3 font-bold text-slate-950 hover:bg-cyan-300 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
-                disabled={!selectedFile}
                 onClick={handleSave}
-                type="button"
+                disabled={!selectedFile}
+                className={`w-full py-3 rounded-lg text-sm font-semibold tracking-wide transition active:scale-[0.98] ${
+                  selectedFile
+                    ? "bg-gradient-to-r from-cyan-500 to-lime-500 text-slate-950 font-bold hover:shadow-lg hover:shadow-cyan-500/20"
+                    : "bg-slate-800 text-gray-500 border border-slate-700 cursor-not-allowed"
+                }`}
               >
-                บันทึกรูปภาพใหม่
+                บันทึกภาพแบนเนอร์ใหม่
               </button>
+
               <button
-                className="w-full rounded-lg border border-rose-500/30 py-3 font-semibold text-rose-300 hover:bg-rose-500/10"
                 onClick={handleReset}
-                type="button"
+                className="w-full bg-slate-950/80 hover:bg-slate-950 text-rose-400 border border-rose-500/30 rounded-lg py-2.5 font-semibold text-xs tracking-wide transition active:scale-[0.98]"
               >
-                คืนค่าเริ่มต้น
+                คืนค่าเริ่มต้น (RESET DEFAULT)
               </button>
-              <Link
-                className="block rounded-lg border border-cyan-500/40 py-3 text-center font-semibold text-cyan-300 hover:bg-cyan-500/10"
-                href="/"
-              >
-                กลับหน้าแรก
+
+              <div className="h-px bg-slate-800 my-4" />
+
+              <Link href="/" className="block">
+                <button className="w-full bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 rounded-lg py-2.5 font-semibold font-mono text-xs tracking-wide transition active:scale-[0.98]">
+                  &lt; BACK TO INVITATION
+                </button>
               </Link>
             </div>
           </div>
         )}
-      </section>
+      </div>
     </main>
   );
 }
