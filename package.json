@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "docker:build": "docker build -t anonsrirat/banpick-rov:latest .",
+    "docker:build": "docker build -t arnonsrirat/banpick-rov:latest .",
     "start": "next start",
     "lint": "eslint"
   },
