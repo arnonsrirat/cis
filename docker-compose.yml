@@ -1,18 +1,20 @@
-name: cis-invitation-card
-
 services:
-  cis-invitation:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: cis-invitation-card:latest
-    container_name: cis-invitation-card
+  banpick-rov:
+    image: anonsrirat/banpick-rov:latest
+    container_name: banpick-rov
     restart: unless-stopped
-    expose:
-      - "80"
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    volumes:
+      - ads_uploads:/app/public/uploads
     networks:
       - network_proxy
 
 networks:
   network_proxy:
     external: true
+
+volumes:
+  ads_uploads:
