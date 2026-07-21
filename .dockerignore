@@ -1,0 +1,12 @@
+.next
+.serena
+node_modules
+npm-debug.log
+Dockerfile
+docker-compose.yml
+.env.local
+.env
+.env.*
+.git
+.gitignore
+README.md

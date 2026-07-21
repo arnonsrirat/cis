@@ -1,26 +1,137 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@500;600;700&display=swap');
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #02050a;
+  --foreground: #f0f4f9;
+  --blue-glow: #00bcff;
+  --red-glow: #ff003c;
+  --cyber-dark: #070e17;
+  --cyber-dark-accent: #0f1c2d;
 }
 
-@theme inline {
+@theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-blue-glow: var(--blue-glow);
+  --color-red-glow: var(--red-glow);
+  --color-cyber-dark: var(--cyber-dark);
+  --color-cyber-dark-accent: var(--cyber-dark-accent);
+  --font-orbitron: 'Orbitron', sans-serif;
+  --font-rajdhani: 'Rajdhani', sans-serif;
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Rajdhani', var(--font-sans), sans-serif;
+  overflow-x: hidden;
 }
+
+button {
+  cursor: pointer;
+}
+
+/* Custom Cyber/Sci-Fi HUD Utilities */
+.bg-cyber-grid {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+}
+
+.bg-cyber-scan {
+  position: relative;
+  overflow: hidden;
+}
+
+.bg-cyber-scan::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(to right, transparent, var(--blue-glow), transparent);
+  animation: cyber-scanning 2.5s linear infinite;
+  opacity: 0.7;
+}
+
+.bg-cyber-scan-red::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(to right, transparent, var(--red-glow), transparent);
+  animation: cyber-scanning 2.5s linear infinite;
+  opacity: 0.7;
+}
+
+@keyframes cyber-scanning {
+  0% { top: -5%; }
+  100% { top: 105%; }
+}
+
+/* Clip Paths for Futuristic Panels */
+.clip-cyber-panel {
+  clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+}
+
+.clip-cyber-panel-sm {
+  clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+}
+
+.clip-cyber-btn {
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 0);
+}
+
+.clip-cyber-header-l {
+  clip-path: polygon(0 0, 92% 0, 100% 100%, 0% 100%);
+}
+
+.clip-cyber-header-r {
+  clip-path: polygon(8% 0, 100% 0, 100% 100%, 0% 100%);
+}
+
+.clip-cyber-vs {
+  clip-path: polygon(18% 0, 82% 0, 100% 20%, 100% 80%, 82% 100%, 18% 100%, 0 80%, 0 20%);
+}
+
+/* Text and Shadow Glows */
+.text-glow-blue {
+  text-shadow: 0 0 10px rgba(0, 188, 255, 0.6), 0 0 20px rgba(0, 188, 255, 0.3);
+}
+
+.text-glow-red {
+  text-shadow: 0 0 10px rgba(255, 0, 60, 0.6), 0 0 20px rgba(255, 0, 60, 0.3);
+}
+
+.shadow-glow-blue {
+  box-shadow: 0 0 15px rgba(0, 188, 255, 0.25);
+}
+
+.shadow-glow-red {
+  box-shadow: 0 0 15px rgba(255, 0, 60, 0.25);
+}
+
+.shadow-glow-blue-active {
+  box-shadow: 0 0 25px rgba(0, 188, 255, 0.65), inset 0 0 15px rgba(0, 188, 255, 0.3);
+}
+
+.shadow-glow-red-active {
+  box-shadow: 0 0 25px rgba(255, 0, 60, 0.65), inset 0 0 15px rgba(255, 0, 60, 0.3);
+}
+
+/* Honeycomb Grid Pattern (Hexagonal details) */
+.bg-honeycomb {
+  background-color: transparent;
+  background-image: 
+    radial-gradient(circle at 50% 25%, transparent 55%, rgba(0, 0, 0, 0.15) 55%),
+    linear-gradient(30deg, transparent 40%, rgba(255,255,255,0.015) 40%, rgba(255,255,255,0.015) 60%, transparent 60%),
+    linear-gradient(150deg, transparent 40%, rgba(255,255,255,0.015) 40%, rgba(255,255,255,0.015) 60%, transparent 60%),
+    radial-gradient(circle at 50% 75%, transparent 55%, rgba(0, 0, 0, 0.15) 55%),
+    linear-gradient(30deg, transparent 40%, rgba(255,255,255,0.015) 40%, rgba(255,255,255,0.015) 60%, transparent 60%),
+    linear-gradient(150deg, transparent 40%, rgba(255,255,255,0.015) 40%, rgba(255,255,255,0.015) 60%, transparent 60%);
+  background-size: 16px 28px;
+}
+

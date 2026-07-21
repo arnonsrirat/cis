@@ -1,0 +1,20 @@
+services:
+  banpick-rov:
+    image: anonsrirat/banpick-rov:latest
+    container_name: banpick-rov
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    volumes:
+      - ads_uploads:/app/public/uploads
+    networks:
+      - network_proxy
+
+networks:
+  network_proxy:
+    external: true
+
+volumes:
+  ads_uploads:
